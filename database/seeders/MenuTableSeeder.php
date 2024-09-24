@@ -45,6 +45,16 @@ class MenuTableSeeder extends Seeder
             'parent_id' => '-',
             'level' => 0
         ]);
+        $ref = Menu::create([
+            'menu' => 'Referensi',
+            'module' => 'no',
+            'routing' => 'no',
+            'is_tampil' => 1,
+            'icon' => 'fa-folder',
+            'urutan' => 4,
+            'parent_id' => '-',
+            'level' => 0
+        ]);
         Menu::create([
             'menu' => 'Dashboard',
             'module' => 'dashboard',
