@@ -15,6 +15,8 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->string('id', 36)->primary();
+            $table->uuid('id_sekolah')->nullable();
+            $table->foreign('id_sekolah')->references('id')->on('sekolah')->onDelete('restrict')->onUpdate('cascade');
             $table->string('name');
             $table->string('username');
             $table->string('email')->unique();
