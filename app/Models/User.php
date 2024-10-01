@@ -49,8 +49,8 @@ class User extends Authenticatable
     // {
     //     return Attribute::make(
     //         function($value){
-	// 			return Format::inisial($value);
-	// 		});
+    // 			return Format::inisial($value);
+    // 		});
     // }
 
     public function initials()

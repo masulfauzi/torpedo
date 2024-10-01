@@ -23,8 +23,8 @@ return new class extends Migration
             $table->foreign('id_status_sekolah')->references('id')->on('status_sekolah')->onDelete('restrict')->onUpdate('cascade');
             $table->string('nama_sekolah');
             $table->string('npsn')->unique();
-            $table->text('alamat');
-            $table->uuid('id_desa');
+            $table->text('alamat')->nullable();
+            $table->uuid('id_desa')->nullable();
             $table->foreign('id_desa')->references('id')->on('desa')->onDelete('restrict')->onUpdate('cascade');
 
             $table->timestamps();

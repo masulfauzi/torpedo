@@ -24,8 +24,34 @@ class RoleTableSeeder extends Seeder
             'level' => 2
         ]);
         Role::create([
-            'role' => 'User',
-            'level' => 2
+            'role' => 'Operator Sekolah',
+            'level' => 3
+        ]);
+        Role::create([
+            'role' => 'Guru',
+            'level' => 3
+        ]);
+        Role::create([
+            'role' => 'Wakil Kepala Sekolah',
+            'level' => 3
+        ]);
+        Role::create([
+            'role' => 'Siswa',
+            'level' => 3
+        ]);
+        Role::create([
+            'role' => 'BK',
+            'level' => 3
+        ]);
+
+        Role::create([
+            'role' => 'Kepala Sekolah',
+            'level' => 3
+        ]);
+
+        Role::create([
+            'role' => 'Wali Murid',
+            'level' => 3
         ]);
     }
 }

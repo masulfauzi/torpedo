@@ -27,11 +27,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call(UsersTableSeeder::class);
-        $this->call(RoleTableSeeder::class);
-        $this->call(UserRoleTableSeeder::class);
-        $this->call(MenuTableSeeder::class);
-        $this->call(PrivilegeTableSeeder::class);
         // \App\Models\User::factory(10)->create();
 
         // \App\Models\User::factory()->create([
@@ -96,5 +91,11 @@ class DatabaseSeeder extends Seeder
             'alamat' => 'Jl. Dr Cipto no. 121A',
             'id_desa' => $desa->id,
         ]);
+
+        $this->call(UsersTableSeeder::class);
+        $this->call(RoleTableSeeder::class);
+        $this->call(UserRoleTableSeeder::class);
+        $this->call(MenuTableSeeder::class);
+        $this->call(PrivilegeTableSeeder::class);
     }
 }
