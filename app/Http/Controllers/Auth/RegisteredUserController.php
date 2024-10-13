@@ -44,6 +44,7 @@ class RegisteredUserController extends Controller
         // dd($request->input('id_jenis_sekolah'));
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'npsn' => ['required', 'string', 'unique:sekolah'],
             'nama_sekolah' => ['required'],
@@ -59,18 +60,26 @@ class RegisteredUserController extends Controller
         //     'npsn' => $request->input('npsn')
         // ]);
 
-        $jenisSekolah = JenisSekolah::create([
-            'jenis_sekolah' => 'luar_negeri'
-        ]);
+        // $jenisSekolah = JenisSekolah::create([
+        //     'jenis_sekolah' => 'luar_negeri'
+        // ]);
+
+        $insert_sekolah = Sekolah::insert_sekolah($request);
+
+        // dd($insert_sekolah);
 
         $user = User::create([
             'name' => $request->name,
+            'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'id_sekolah' => $sekolah->id,
+            'id_sekolah' => $insert_sekolah,
         ]);
 
+        
         event(new Registered($user));
+        
+        Sekolah::insert_role($user);
 
         Auth::login($user);
 
