@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreign('id_sekolah')->references('id')->on('sekolah')->onDelete('restrict')->onUpdate('cascade');
             $table->string('name');
             $table->string('username');
+            $table->string('no_hp')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

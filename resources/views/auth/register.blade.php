@@ -37,6 +37,13 @@
                             <i class="bi bi-envelope"></i>
                         </div>
                     </div>
+                    <div class="form-group position-relative has-icon-left mb-4">
+                        <input type="number" class="form-control form-control-xl" placeholder="Contoh 628123456789" name="no_hp"
+                            autofocus value="{{ old('no_hp') }}">
+                        <div class="form-control-icon">
+                            <i class="fa fa-phone"></i>
+                        </div>
+                    </div>
 
                     <div class="form-group position-relative has-icon-left mb-4">
                         <input type="npsn" class="form-control form-control-xl" placeholder="NPSN" name="npsn"

@@ -90,4 +90,32 @@ public function desa(){
 
 	}
 
+	public static function kirim_notif_wa($no_hp)
+	{
+		$curl = curl_init();
+
+		curl_setopt_array($curl, array(
+			CURLOPT_URL => 'https://app.saungwa.com/api/create-message',
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => '',
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 0,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => 'POST',
+			CURLOPT_POSTFIELDS => array(
+				'appkey' => '53550f4f-0e39-43e5-84be-fb053e189b44',
+				'authkey' => 'rdq8556tEh4EMWRVGSNczMCzoh3P4f8inUK30qmXAN3WvwNN3N',
+				'to' => $no_hp,
+				'message' => 'Terimakasih telah melakukan registrasi di Torpedo Corp. Siahkan lengkapidata-data untuk melanjutkan.',
+				'sandbox' => 'false'
+			),
+		));
+
+		$response = curl_exec($curl);
+
+		curl_close($curl);
+		return $response;
+	}
+
 }

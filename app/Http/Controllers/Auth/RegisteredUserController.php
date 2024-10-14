@@ -46,6 +46,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'no_hp' => ['required'],
             'npsn' => ['required', 'string', 'unique:sekolah'],
             'nama_sekolah' => ['required'],
             'id_jenis_sekolah' => ['required'],
@@ -71,10 +72,13 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'username' => $request->username,
+            'no_hp' => $request->no_hp,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'id_sekolah' => $insert_sekolah,
         ]);
+
+        Sekolah::kirim_notif_wa($request->no_hp);
 
         
         event(new Registered($user));
