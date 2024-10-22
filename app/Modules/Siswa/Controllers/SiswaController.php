@@ -6,19 +6,20 @@ use Form;
 use App\Helpers\Logger;
 use Illuminate\Http\Request;
 use App\Modules\Log\Models\Log;
-use App\Modules\Siswa\Models\Siswa;
-use App\Modules\Agama\Models\Agama;
-use App\Modules\AlasanPip\Models\AlasanPip;
-use App\Modules\AlasanTolakKip\Models\AlasanTolakKip;
 use App\Modules\Desa\Models\Desa;
-use App\Modules\Disabilitas\Models\Disabilitas;
-use App\Modules\JenisKelamin\Models\JenisKelamin;
-use App\Modules\Sekolah\Models\Sekolah;
-use App\Modules\TempatTinggal\Models\TempatTinggal;
-use App\Modules\Transportasi\Models\Transportasi;
-
+use App\Modules\Agama\Models\Agama;
+use App\Modules\Siswa\Models\Siswa;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Modules\Sekolah\Models\Sekolah;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Modules\AlasanPip\Models\AlasanPip;
+use App\Modules\Disabilitas\Models\Disabilitas;
+use App\Modules\JenisKelamin\Models\JenisKelamin;
+
+use App\Modules\Transportasi\Models\Transportasi;
+use App\Modules\TempatTinggal\Models\TempatTinggal;
+use App\Modules\AlasanTolakKip\Models\AlasanTolakKip;
 
 class SiswaController extends Controller
 {
@@ -377,6 +378,52 @@ class SiswaController extends Controller
 
 	public function import(Request $request)
 	{
-		dd(Auth::user());
+		$data['forms'] = array(
+			'file' => ['Pilih Salah Satu', Form::file("file", ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+
+		);
+
+		$this->log($request, 'membuka form import ' . $this->title);
+		return view('Siswa::siswa_import', array_merge($data, ['title' => $this->title]));
+	}
+
+	public function file_store(Request $request)
+	{
+		$request->validate([
+			'file' => 'required|mimes:xlsx|max:10240'
+		]);
+
+		$file = $request->file('file');
+		$reader = IOFactory::createReader('Xlsx');
+		$spreadsheet = $reader->load($file);
+
+		$worksheet = $spreadsheet->getActiveSheet();
+		$data = $worksheet->toArray();
+
+		for ($i = 1; $i < count($data); $i++) {
+			// print_r($data[$i]);
+
+			$jenisKelamin = JenisKelamin::where('kode', $data[$i][3])->first();
+			$agama = Agama::where('agama', $data[$i][8])->first();
+			$tempatTinggal = TempatTinggal::where('tempat_tinggal', $data[$i][12])->first();
+			$transportasi = Transportasi::where('transportasi', $data[$i][13])->first();
+			Siswa::create([
+				'nama_siswa' => htmlspecialchars($data[$i][1]),
+				'nis' => $data[$i][2],
+				'id_jenis_kelamin' => $jenisKelamin->id,
+				'nisn' => $data[$i][4],
+				'tmp_lahir' => $data[$i][5],
+				'tgl_lahir' => $data[$i][6],
+				'nik' => $data[$i][7],
+				'id_agama' => $agama->id,
+				'alamat' => $data[$i][9],
+				'rt' => $data[$i][10],
+				'rw' => $data[$i][11],
+				'id_tempat_tinggal' => $tempatTinggal->id,
+				'id_transportasi' => $transportasi->id,
+				'no_telp' => $data[$i][14],
+				'no_hp' => $data[$i][15],
+			]);
+		}
 	}
 }

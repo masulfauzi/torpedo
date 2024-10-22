@@ -17,6 +17,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
 
             $table->string('jenis_kelamin');
+            $table->string('kode');
 
             $table->timestamps();
             $table->softDeletes();

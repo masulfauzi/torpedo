@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreign('id_jenis_kelamin')->references('id')->on('jenis_kelamin')->onDelete('restrict')->onUpdate('cascade');
             $table->date('tgl_masuk');
             $table->string('nisn');
-            $table->string('nis');
+            $table->string('nis')->nullable();
             $table->string('no_ijazah_smp');
             $table->string('no_skhun_smp');
             $table->string('no_un_smp');
@@ -48,9 +48,9 @@ return new class extends Migration
             $table->foreign('id_transportasi')->references('id')->on('transportasi')->onDelete('restrict')->onUpdate('cascade');
             $table->uuid('id_tempat_tinggal');
             $table->foreign('id_tempat_tinggal')->references('id')->on('tempat_tinggal')->onDelete('restrict')->onUpdate('cascade');
-            $table->string('no_telp');
-            $table->string('no_hp');
-            $table->string('email');
+            $table->string('no_telp')->nullable();
+            $table->string('no_hp')->nullable();
+            $table->string('email')->nullable();
             $table->string('no_kks');
             $table->boolean('is_kps');
             $table->string('no_kps');

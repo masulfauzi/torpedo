@@ -5,6 +5,7 @@ use App\Modules\Siswa\Controllers\SiswaController;
 
 Route::controller(SiswaController::class)->middleware(['web', 'auth'])->name('siswa.')->group(function () {
 	Route::get('/siswa/import', 'import')->name('import.index');
+	Route::post('/siswa/import', 'file_store')->name('import.store');
 
 	Route::get('/siswa', 'index')->name('index');
 	Route::get('/siswa/data', 'data')->name('data.index');

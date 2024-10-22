@@ -16,10 +16,12 @@ class JenisKelaminSeeder extends Seeder
     public function run()
     {
         JenisKelamin::create([
-            'jenis_kelamin' => 'Laki-Laki'
+            'jenis_kelamin' => 'Laki-Laki',
+            'kode' => 'L'
         ]);
         JenisKelamin::create([
-            'jenis_kelamin' => 'Perempuan'
+            'jenis_kelamin' => 'Perempuan',
+            'kode' => 'P'
         ]);
     }
 }
