@@ -5,16 +5,20 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use App\Modules\Desa\Models\Desa;
+use Database\Seeders\AgamaSeeder;
 use Database\Seeders\MenuTableSeeder;
 use Database\Seeders\RoleTableSeeder;
 use Database\Seeders\UsersTableSeeder;
 use App\Modules\Sekolah\Models\Sekolah;
+use Database\Seeders\JenisKelaminSeeder;
+use Database\Seeders\TransportasiSeeder;
+use App\Modules\Provinsi\Models\Provinsi;
+use Database\Seeders\TempatTinggalSeeder;
 use Database\Seeders\UserRoleTableSeeder;
 use Database\Seeders\PrivilegeTableSeeder;
 use App\Modules\Kabupaten\Models\Kabupaten;
 use App\Modules\Kecamatan\Models\Kecamatan;
 use App\Modules\JenisSekolah\Models\JenisSekolah;
-use App\Modules\Provinsi\Models\Provinsi;
 use App\Modules\StatusSekolah\Models\StatusSekolah;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
@@ -97,5 +101,9 @@ class DatabaseSeeder extends Seeder
         $this->call(UserRoleTableSeeder::class);
         $this->call(MenuTableSeeder::class);
         $this->call(PrivilegeTableSeeder::class);
+        $this->call(JenisKelaminSeeder::class);
+        $this->call(AgamaSeeder::class);
+        $this->call(TempatTinggalSeeder::class);
+        $this->call(TransportasiSeeder::class);
     }
 }
