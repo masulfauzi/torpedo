@@ -3,7 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Modules\Siswa\Controllers\SiswaController;
 
-Route::controller(SiswaController::class)->middleware(['web','auth'])->name('siswa.')->group(function(){
+Route::controller(SiswaController::class)->middleware(['web', 'auth'])->name('siswa.')->group(function () {
+	Route::get('/siswa/import', 'import')->name('import.index');
+
 	Route::get('/siswa', 'index')->name('index');
 	Route::get('/siswa/data', 'data')->name('data.index');
 	Route::get('/siswa/create', 'create')->name('create');
