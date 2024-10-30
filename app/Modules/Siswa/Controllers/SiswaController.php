@@ -8,18 +8,21 @@ use Illuminate\Http\Request;
 use App\Modules\Log\Models\Log;
 use App\Modules\Desa\Models\Desa;
 use App\Modules\Agama\Models\Agama;
+use App\Modules\Kelas\Models\Kelas;
 use App\Modules\Siswa\Models\Siswa;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Modules\Sekolah\Models\Sekolah;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Modules\Semester\Models\Semester;
 use App\Modules\AlasanPip\Models\AlasanPip;
+
 use App\Modules\Disabilitas\Models\Disabilitas;
 use App\Modules\JenisKelamin\Models\JenisKelamin;
-
 use App\Modules\Transportasi\Models\Transportasi;
 use App\Modules\TempatTinggal\Models\TempatTinggal;
 use App\Modules\AlasanTolakKip\Models\AlasanTolakKip;
+use App\Modules\AnggotaKelas\Models\AnggotaKelas;
 
 class SiswaController extends Controller
 {
@@ -401,29 +404,64 @@ class SiswaController extends Controller
 		$data = $worksheet->toArray();
 
 		for ($i = 1; $i < count($data); $i++) {
-			// print_r($data[$i]);
 
 			$jenisKelamin = JenisKelamin::where('kode', $data[$i][3])->first();
 			$agama = Agama::where('agama', $data[$i][8])->first();
+			if (!$agama) {
+
+				$agama = Agama::where('agama', 'islam')->first();
+			}
 			$tempatTinggal = TempatTinggal::where('tempat_tinggal', $data[$i][12])->first();
 			$transportasi = Transportasi::where('transportasi', $data[$i][13])->first();
-			Siswa::create([
-				'nama_siswa' => htmlspecialchars($data[$i][1]),
-				'nis' => $data[$i][2],
-				'id_jenis_kelamin' => $jenisKelamin->id,
-				'nisn' => $data[$i][4],
-				'tmp_lahir' => $data[$i][5],
-				'tgl_lahir' => $data[$i][6],
-				'nik' => $data[$i][7],
-				'id_agama' => $agama->id,
-				'alamat' => $data[$i][9],
-				'rt' => $data[$i][10],
-				'rw' => $data[$i][11],
-				'id_tempat_tinggal' => $tempatTinggal->id,
-				'id_transportasi' => $transportasi->id,
-				'no_telp' => $data[$i][14],
-				'no_hp' => $data[$i][15],
-			]);
+
+			$siswa = new Siswa();
+
+			$siswa->nama_siswa = htmlspecialchars($data[$i][1]);
+			$siswa->nis = $data[$i][2];
+			$siswa->id_jenis_kelamin = $jenisKelamin->id;
+			$siswa->nisn = $data[$i][4];
+			$siswa->tmp_lahir = $data[$i][5];
+			$siswa->tgl_lahir = $data[$i][6];
+			$siswa->nik = $data[$i][7];
+
+			$siswa->id_agama = $agama->id;
+			$siswa->alamat = $data[$i][9];
+			$siswa->rt = $data[$i][10];
+			$siswa->rw = $data[$i][11];
+			$siswa->id_tempat_tinggal = $tempatTinggal->id;
+			if ($transportasi) {
+
+				$siswa->id_transportasi = $transportasi->id;
+			}
+			$siswa->no_telp = $data[$i][14];
+			$siswa->no_hp = $data[$i][15];
+			$siswa->email = $data[$i][16];
+			$siswa->id_sekolah = Auth::user()->id_sekolah;
+
+			$siswa->save();
+
+
+			$kelas = Kelas::where('kode_kelas', $data[$i][17])->first();
+
+
+			if (!$kelas) {
+				$kelas = new Kelas();
+
+				$kelas->nama_kelas = $data[$i][17];
+				$kelas->kode_kelas = $data[$i][17];
+				$kelas->id_sekolah = Auth::user()->id_sekolah;
+
+				$kelas->save();
+			}
+
+			$semester = Semester::where('is_active', 1)->first();
+
+			$anggota_kelas = new AnggotaKelas();
+			$anggota_kelas->id_siswa = $siswa->id;
+			$anggota_kelas->id_kelas = $kelas->id;
+			$anggota_kelas->id_semester = $semester->id;
+
+			$anggota_kelas->save();
 		}
 	}
 }

@@ -18,11 +18,8 @@ return new class extends Migration
 
             $table->uuid('id_sekolah');
             $table->foreign('id_sekolah')->references('id')->on('sekolah')->onDelete('restrict')->onUpdate('cascade');
-
-            $table->uuid('id_jurusan');
-            $table->foreign('id_jurusan')->references('id')->on('jurusan')->onDelete('restrict')->onUpdate('cascade');
-
             $table->string('nama_kelas');
+            $table->string('kode_kelas');
 
             $table->timestamps();
             $table->softDeletes();
