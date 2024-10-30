@@ -105,5 +105,6 @@ class DatabaseSeeder extends Seeder
         $this->call(AgamaSeeder::class);
         $this->call(TempatTinggalSeeder::class);
         $this->call(TransportasiSeeder::class);
+        $this->call(SemesterSeeder::class);
     }
 }

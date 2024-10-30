@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('tgl_mulai');
             $table->date('tgl_selesai');
             $table->integer('urutan');
+            $table->boolean('is_active');
 
             $table->timestamps();
             $table->softDeletes();

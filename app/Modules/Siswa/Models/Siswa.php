@@ -24,34 +24,42 @@ class Siswa extends Model
 
 	protected $casts      = ['deleted_at' => 'datetime', 'created_at' => 'datetime', 'updated_at' => 'datetime'];
 	protected $table      = 'siswa';
-	protected $fillable   = ['*'];	
+	protected $fillable   = ['*'];
 
-	public function agama(){
-		return $this->belongsTo(Agama::class,"id_agama","id");
+	public function agama()
+	{
+		return $this->belongsTo(Agama::class, "id_agama", "id");
 	}
-public function alasanPip(){
-		return $this->belongsTo(AlasanPip::class,"id_alasan_pip","id");
+	public function alasanPip()
+	{
+		return $this->belongsTo(AlasanPip::class, "id_alasan_pip", "id");
 	}
-public function alasanTolakKip(){
-		return $this->belongsTo(AlasanTolakKip::class,"id_alasan_tolak_kip","id");
+	public function alasanTolakKip()
+	{
+		return $this->belongsTo(AlasanTolakKip::class, "id_alasan_tolak_kip", "id");
 	}
-public function desa(){
-		return $this->belongsTo(Desa::class,"id_desa","id");
+	public function desa()
+	{
+		return $this->belongsTo(Desa::class, "id_desa", "id");
 	}
-public function disabilitas(){
-		return $this->belongsTo(Disabilitas::class,"id_disabilitas","id");
+	public function disabilitas()
+	{
+		return $this->belongsTo(Disabilitas::class, "id_disabilitas", "id");
 	}
-public function jenisKelamin(){
-		return $this->belongsTo(JenisKelamin::class,"id_jenis_kelamin","id");
+	public function jenisKelamin()
+	{
+		return $this->belongsTo(JenisKelamin::class, "id_jenis_kelamin", "id");
 	}
-public function sekolah(){
-		return $this->belongsTo(Sekolah::class,"id_sekolah","id");
+	public function sekolah()
+	{
+		return $this->belongsTo(Sekolah::class, "id_sekolah", "id");
 	}
-public function tempatTinggal(){
-		return $this->belongsTo(TempatTinggal::class,"id_tempat_tinggal","id");
+	public function tempatTinggal()
+	{
+		return $this->belongsTo(TempatTinggal::class, "id_tempat_tinggal", "id");
 	}
-public function transportasi(){
-		return $this->belongsTo(Transportasi::class,"id_transportasi","id");
+	public function transportasi()
+	{
+		return $this->belongsTo(Transportasi::class, "id_transportasi", "id");
 	}
-
 }
