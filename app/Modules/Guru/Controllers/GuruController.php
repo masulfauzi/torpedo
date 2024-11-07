@@ -1,29 +1,37 @@
 <?php
+
 namespace App\Modules\Guru\Controllers;
 
 use Form;
 use App\Helpers\Logger;
 use Illuminate\Http\Request;
 use App\Modules\Log\Models\Log;
+use App\Modules\Desa\Models\Desa;
 use App\Modules\Guru\Models\Guru;
 use App\Modules\Agama\Models\Agama;
-use App\Modules\Desa\Models\Desa;
-use App\Modules\Disabilitas\Models\Disabilitas;
-use App\Modules\JenisKelamin\Models\JenisKelamin;
-use App\Modules\Pekerjaan\Models\Pekerjaan;
-use App\Modules\Sekolah\Models\Sekolah;
-use App\Modules\StatusKepegawaian\Models\StatusKepegawaian;
-use App\Modules\StatusPerkawinan\Models\StatusPerkawinan;
-
+use App\Modules\Kelas\Models\Kelas;
+use App\Modules\Siswa\Models\Siswa;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Modules\Sekolah\Models\Sekolah;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
+use App\Modules\Semester\Models\Semester;
+use App\Modules\Pekerjaan\Models\Pekerjaan;
+use App\Modules\Disabilitas\Models\Disabilitas;
+use App\Modules\AnggotaKelas\Models\AnggotaKelas;
+use App\Modules\JenisKelamin\Models\JenisKelamin;
+use App\Modules\Transportasi\Models\Transportasi;
+use App\Modules\TempatTinggal\Models\TempatTinggal;
+use App\Modules\StatusPerkawinan\Models\StatusPerkawinan;
+use App\Modules\StatusKepegawaian\Models\StatusKepegawaian;
 
 class GuruController extends Controller
 {
 	use Logger;
 	protected $log;
 	protected $title = "Guru";
-	
+
 	public function __construct(Log $log)
 	{
 		$this->log = $log;
@@ -32,63 +40,63 @@ class GuruController extends Controller
 	public function index(Request $request)
 	{
 		$query = Guru::query();
-		if($request->has('search')){
+		if ($request->has('search')) {
 			$search = $request->get('search');
 			// $query->where('name', 'like', "%$search%");
 		}
 		$data['data'] = $query->paginate(10)->withQueryString();
 
-		$this->log($request, 'melihat halaman manajemen data '.$this->title);
+		$this->log($request, 'melihat halaman manajemen data ' . $this->title);
 		return view('Guru::guru', array_merge($data, ['title' => $this->title]));
 	}
 
 	public function create(Request $request)
 	{
-		$ref_agama = Agama::all()->pluck('created_at','id');
-		$ref_desa = Desa::all()->pluck('created_by','id');
-		$ref_disabilitas = Disabilitas::all()->pluck('created_by','id');
-		$ref_jenis_kelamin = JenisKelamin::all()->pluck('created_by','id');
-		$ref_pekerjaan = Pekerjaan::all()->pluck('created_by','id');
-		$ref_sekolah = Sekolah::all()->pluck('created_at','id');
-		$ref_status_kepegawaian = StatusKepegawaian::all()->pluck('created_by','id');
-		$ref_status_perkawinan = StatusPerkawinan::all()->pluck('created_by','id');
-		
+		$ref_agama = Agama::all()->pluck('created_at', 'id');
+		$ref_desa = Desa::all()->pluck('created_by', 'id');
+		$ref_disabilitas = Disabilitas::all()->pluck('created_by', 'id');
+		$ref_jenis_kelamin = JenisKelamin::all()->pluck('created_by', 'id');
+		$ref_pekerjaan = Pekerjaan::all()->pluck('created_by', 'id');
+		$ref_sekolah = Sekolah::all()->pluck('created_at', 'id');
+		$ref_status_kepegawaian = StatusKepegawaian::all()->pluck('created_by', 'id');
+		$ref_status_perkawinan = StatusPerkawinan::all()->pluck('created_by', 'id');
+
 		$data['forms'] = array(
-			'alamat' => ['Alamat', Form::textarea("alamat", old("alamat"), ["class" => "form-control rich-editor"]) ],
-			'bujur' => ['Bujur', Form::text("bujur", old("bujur"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'dusun' => ['Dusun', Form::text("dusun", old("dusun"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'email' => ['Email', Form::text("email", old("email"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'gelar_belakang' => ['Gelar Belakang', Form::text("gelar_belakang", old("gelar_belakang"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'gelar_depan' => ['Gelar Depan', Form::text("gelar_depan", old("gelar_depan"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'id_agama' => ['Agama', Form::select("id_agama", $ref_agama, null, ["class" => "form-control select2"]) ],
-			'id_desa' => ['Desa', Form::select("id_desa", $ref_desa, null, ["class" => "form-control select2"]) ],
-			'id_disabilitas' => ['Disabilitas', Form::select("id_disabilitas", $ref_disabilitas, null, ["class" => "form-control select2"]) ],
-			'id_jenis_kelamin' => ['Jenis Kelamin', Form::select("id_jenis_kelamin", $ref_jenis_kelamin, null, ["class" => "form-control select2"]) ],
-			'id_pekerjaan_pasangan' => ['Pekerjaan Pasangan', Form::select("id_pekerjaan_pasangan", $ref_pekerjaan, null, ["class" => "form-control select2"]) ],
-			'id_sekolah' => ['Sekolah', Form::select("id_sekolah", $ref_sekolah, null, ["class" => "form-control select2"]) ],
-			'id_status_kepegawaian' => ['Status Kepegawaian', Form::select("id_status_kepegawaian", $ref_status_kepegawaian, null, ["class" => "form-control select2"]) ],
-			'id_status_perkawinan' => ['Status Perkawinan', Form::select("id_status_perkawinan", $ref_status_perkawinan, null, ["class" => "form-control select2"]) ],
-			'kode_pos' => ['Kode Pos', Form::text("kode_pos", old("kode_pos"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'lintang' => ['Lintang', Form::text("lintang", old("lintang"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'nama' => ['Nama', Form::text("nama", old("nama"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'nama_ibu_kandung' => ['Nama Ibu Kandung', Form::text("nama_ibu_kandung", old("nama_ibu_kandung"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'nama_pasangan' => ['Nama Pasangan', Form::text("nama_pasangan", old("nama_pasangan"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'nik' => ['Nik', Form::text("nik", old("nik"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'nip' => ['Nip', Form::text("nip", old("nip"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'no_hp' => ['No Hp', Form::text("no_hp", old("no_hp"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'no_kk' => ['No Kk', Form::text("no_kk", old("no_kk"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'npwp' => ['Npwp', Form::text("npwp", old("npwp"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'nuptk' => ['Nuptk', Form::text("nuptk", old("nuptk"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'rt' => ['Rt', Form::text("rt", old("rt"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'rw' => ['Rw', Form::text("rw", old("rw"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'sk_pengangkatan' => ['Sk Pengangkatan', Form::text("sk_pengangkatan", old("sk_pengangkatan"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'tgl_lahir' => ['Tgl Lahir', Form::text("tgl_lahir", old("tgl_lahir"), ["class" => "form-control datepicker", "required" => "required"]) ],
-			'tmp_lahir' => ['Tmp Lahir', Form::text("tmp_lahir", old("tmp_lahir"), ["class" => "form-control","placeholder" => "", "required" => "required"]) ],
-			'tmt_pengangkatan' => ['Tmt Pengangkatan', Form::text("tmt_pengangkatan", old("tmt_pengangkatan"), ["class" => "form-control datepicker", "required" => "required"]) ],
-			
+			'alamat' => ['Alamat', Form::textarea("alamat", old("alamat"), ["class" => "form-control rich-editor"])],
+			'bujur' => ['Bujur', Form::text("bujur", old("bujur"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'dusun' => ['Dusun', Form::text("dusun", old("dusun"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'email' => ['Email', Form::text("email", old("email"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'gelar_belakang' => ['Gelar Belakang', Form::text("gelar_belakang", old("gelar_belakang"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'gelar_depan' => ['Gelar Depan', Form::text("gelar_depan", old("gelar_depan"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'id_agama' => ['Agama', Form::select("id_agama", $ref_agama, null, ["class" => "form-control select2"])],
+			'id_desa' => ['Desa', Form::select("id_desa", $ref_desa, null, ["class" => "form-control select2"])],
+			'id_disabilitas' => ['Disabilitas', Form::select("id_disabilitas", $ref_disabilitas, null, ["class" => "form-control select2"])],
+			'id_jenis_kelamin' => ['Jenis Kelamin', Form::select("id_jenis_kelamin", $ref_jenis_kelamin, null, ["class" => "form-control select2"])],
+			'id_pekerjaan_pasangan' => ['Pekerjaan Pasangan', Form::select("id_pekerjaan_pasangan", $ref_pekerjaan, null, ["class" => "form-control select2"])],
+			'id_sekolah' => ['Sekolah', Form::select("id_sekolah", $ref_sekolah, null, ["class" => "form-control select2"])],
+			'id_status_kepegawaian' => ['Status Kepegawaian', Form::select("id_status_kepegawaian", $ref_status_kepegawaian, null, ["class" => "form-control select2"])],
+			'id_status_perkawinan' => ['Status Perkawinan', Form::select("id_status_perkawinan", $ref_status_perkawinan, null, ["class" => "form-control select2"])],
+			'kode_pos' => ['Kode Pos', Form::text("kode_pos", old("kode_pos"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'lintang' => ['Lintang', Form::text("lintang", old("lintang"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'nama' => ['Nama', Form::text("nama", old("nama"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'nama_ibu_kandung' => ['Nama Ibu Kandung', Form::text("nama_ibu_kandung", old("nama_ibu_kandung"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'nama_pasangan' => ['Nama Pasangan', Form::text("nama_pasangan", old("nama_pasangan"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'nik' => ['Nik', Form::text("nik", old("nik"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'nip' => ['Nip', Form::text("nip", old("nip"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'no_hp' => ['No Hp', Form::text("no_hp", old("no_hp"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'no_kk' => ['No Kk', Form::text("no_kk", old("no_kk"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'npwp' => ['Npwp', Form::text("npwp", old("npwp"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'nuptk' => ['Nuptk', Form::text("nuptk", old("nuptk"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'rt' => ['Rt', Form::text("rt", old("rt"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'rw' => ['Rw', Form::text("rw", old("rw"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'sk_pengangkatan' => ['Sk Pengangkatan', Form::text("sk_pengangkatan", old("sk_pengangkatan"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'tgl_lahir' => ['Tgl Lahir', Form::text("tgl_lahir", old("tgl_lahir"), ["class" => "form-control datepicker", "required" => "required"])],
+			'tmp_lahir' => ['Tmp Lahir', Form::text("tmp_lahir", old("tmp_lahir"), ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+			'tmt_pengangkatan' => ['Tmt Pengangkatan', Form::text("tmt_pengangkatan", old("tmt_pengangkatan"), ["class" => "form-control datepicker", "required" => "required"])],
+
 		);
 
-		$this->log($request, 'membuka form tambah '.$this->title);
+		$this->log($request, 'membuka form tambah ' . $this->title);
 		return view('Guru::guru_create', array_merge($data, ['title' => $this->title]));
 	}
 
@@ -126,7 +134,7 @@ class GuruController extends Controller
 			'tgl_lahir' => 'required',
 			'tmp_lahir' => 'required',
 			'tmt_pengangkatan' => 'required',
-			
+
 		]);
 
 		$guru = new Guru();
@@ -161,11 +169,11 @@ class GuruController extends Controller
 		$guru->tgl_lahir = $request->input("tgl_lahir");
 		$guru->tmp_lahir = $request->input("tmp_lahir");
 		$guru->tmt_pengangkatan = $request->input("tmt_pengangkatan");
-		
+
 		$guru->created_by = Auth::id();
 		$guru->save();
 
-		$text = 'membuat '.$this->title; //' baru '.$guru->what;
+		$text = 'membuat ' . $this->title; //' baru '.$guru->what;
 		$this->log($request, $text, ['guru.id' => $guru->id]);
 		return redirect()->route('guru.index')->with('message_success', 'Guru berhasil ditambahkan!');
 	}
@@ -174,7 +182,7 @@ class GuruController extends Controller
 	{
 		$data['guru'] = $guru;
 
-		$text = 'melihat detail '.$this->title;//.' '.$guru->what;
+		$text = 'melihat detail ' . $this->title; //.' '.$guru->what;
 		$this->log($request, $text, ['guru.id' => $guru->id]);
 		return view('Guru::guru_detail', array_merge($data, ['title' => $this->title]));
 	}
@@ -183,51 +191,51 @@ class GuruController extends Controller
 	{
 		$data['guru'] = $guru;
 
-		$ref_agama = Agama::all()->pluck('created_at','id');
-		$ref_desa = Desa::all()->pluck('created_by','id');
-		$ref_disabilitas = Disabilitas::all()->pluck('created_by','id');
-		$ref_jenis_kelamin = JenisKelamin::all()->pluck('created_by','id');
-		$ref_pekerjaan = Pekerjaan::all()->pluck('created_by','id');
-		$ref_sekolah = Sekolah::all()->pluck('created_at','id');
-		$ref_status_kepegawaian = StatusKepegawaian::all()->pluck('created_by','id');
-		$ref_status_perkawinan = StatusPerkawinan::all()->pluck('created_by','id');
-		
+		$ref_agama = Agama::all()->pluck('created_at', 'id');
+		$ref_desa = Desa::all()->pluck('created_by', 'id');
+		$ref_disabilitas = Disabilitas::all()->pluck('created_by', 'id');
+		$ref_jenis_kelamin = JenisKelamin::all()->pluck('created_by', 'id');
+		$ref_pekerjaan = Pekerjaan::all()->pluck('created_by', 'id');
+		$ref_sekolah = Sekolah::all()->pluck('created_at', 'id');
+		$ref_status_kepegawaian = StatusKepegawaian::all()->pluck('created_by', 'id');
+		$ref_status_perkawinan = StatusPerkawinan::all()->pluck('created_by', 'id');
+
 		$data['forms'] = array(
-			'alamat' => ['Alamat', Form::textarea("alamat", $guru->alamat, ["class" => "form-control rich-editor"]) ],
-			'bujur' => ['Bujur', Form::text("bujur", $guru->bujur, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "bujur"]) ],
-			'dusun' => ['Dusun', Form::text("dusun", $guru->dusun, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "dusun"]) ],
-			'email' => ['Email', Form::text("email", $guru->email, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "email"]) ],
-			'gelar_belakang' => ['Gelar Belakang', Form::text("gelar_belakang", $guru->gelar_belakang, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "gelar_belakang"]) ],
-			'gelar_depan' => ['Gelar Depan', Form::text("gelar_depan", $guru->gelar_depan, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "gelar_depan"]) ],
-			'id_agama' => ['Agama', Form::select("id_agama", $ref_agama, null, ["class" => "form-control select2"]) ],
-			'id_desa' => ['Desa', Form::select("id_desa", $ref_desa, null, ["class" => "form-control select2"]) ],
-			'id_disabilitas' => ['Disabilitas', Form::select("id_disabilitas", $ref_disabilitas, null, ["class" => "form-control select2"]) ],
-			'id_jenis_kelamin' => ['Jenis Kelamin', Form::select("id_jenis_kelamin", $ref_jenis_kelamin, null, ["class" => "form-control select2"]) ],
-			'id_pekerjaan_pasangan' => ['Pekerjaan Pasangan', Form::select("id_pekerjaan_pasangan", $ref_pekerjaan, null, ["class" => "form-control select2"]) ],
-			'id_sekolah' => ['Sekolah', Form::select("id_sekolah", $ref_sekolah, null, ["class" => "form-control select2"]) ],
-			'id_status_kepegawaian' => ['Status Kepegawaian', Form::select("id_status_kepegawaian", $ref_status_kepegawaian, null, ["class" => "form-control select2"]) ],
-			'id_status_perkawinan' => ['Status Perkawinan', Form::select("id_status_perkawinan", $ref_status_perkawinan, null, ["class" => "form-control select2"]) ],
-			'kode_pos' => ['Kode Pos', Form::text("kode_pos", $guru->kode_pos, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "kode_pos"]) ],
-			'lintang' => ['Lintang', Form::text("lintang", $guru->lintang, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "lintang"]) ],
-			'nama' => ['Nama', Form::text("nama", $guru->nama, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "nama"]) ],
-			'nama_ibu_kandung' => ['Nama Ibu Kandung', Form::text("nama_ibu_kandung", $guru->nama_ibu_kandung, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "nama_ibu_kandung"]) ],
-			'nama_pasangan' => ['Nama Pasangan', Form::text("nama_pasangan", $guru->nama_pasangan, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "nama_pasangan"]) ],
-			'nik' => ['Nik', Form::text("nik", $guru->nik, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "nik"]) ],
-			'nip' => ['Nip', Form::text("nip", $guru->nip, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "nip"]) ],
-			'no_hp' => ['No Hp', Form::text("no_hp", $guru->no_hp, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "no_hp"]) ],
-			'no_kk' => ['No Kk', Form::text("no_kk", $guru->no_kk, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "no_kk"]) ],
-			'npwp' => ['Npwp', Form::text("npwp", $guru->npwp, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "npwp"]) ],
-			'nuptk' => ['Nuptk', Form::text("nuptk", $guru->nuptk, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "nuptk"]) ],
-			'rt' => ['Rt', Form::text("rt", $guru->rt, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "rt"]) ],
-			'rw' => ['Rw', Form::text("rw", $guru->rw, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "rw"]) ],
-			'sk_pengangkatan' => ['Sk Pengangkatan', Form::text("sk_pengangkatan", $guru->sk_pengangkatan, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "sk_pengangkatan"]) ],
-			'tgl_lahir' => ['Tgl Lahir', Form::text("tgl_lahir", $guru->tgl_lahir, ["class" => "form-control datepicker", "required" => "required", "id" => "tgl_lahir"]) ],
-			'tmp_lahir' => ['Tmp Lahir', Form::text("tmp_lahir", $guru->tmp_lahir, ["class" => "form-control","placeholder" => "", "required" => "required", "id" => "tmp_lahir"]) ],
-			'tmt_pengangkatan' => ['Tmt Pengangkatan', Form::text("tmt_pengangkatan", $guru->tmt_pengangkatan, ["class" => "form-control datepicker", "required" => "required", "id" => "tmt_pengangkatan"]) ],
-			
+			'alamat' => ['Alamat', Form::textarea("alamat", $guru->alamat, ["class" => "form-control rich-editor"])],
+			'bujur' => ['Bujur', Form::text("bujur", $guru->bujur, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "bujur"])],
+			'dusun' => ['Dusun', Form::text("dusun", $guru->dusun, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "dusun"])],
+			'email' => ['Email', Form::text("email", $guru->email, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "email"])],
+			'gelar_belakang' => ['Gelar Belakang', Form::text("gelar_belakang", $guru->gelar_belakang, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "gelar_belakang"])],
+			'gelar_depan' => ['Gelar Depan', Form::text("gelar_depan", $guru->gelar_depan, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "gelar_depan"])],
+			'id_agama' => ['Agama', Form::select("id_agama", $ref_agama, null, ["class" => "form-control select2"])],
+			'id_desa' => ['Desa', Form::select("id_desa", $ref_desa, null, ["class" => "form-control select2"])],
+			'id_disabilitas' => ['Disabilitas', Form::select("id_disabilitas", $ref_disabilitas, null, ["class" => "form-control select2"])],
+			'id_jenis_kelamin' => ['Jenis Kelamin', Form::select("id_jenis_kelamin", $ref_jenis_kelamin, null, ["class" => "form-control select2"])],
+			'id_pekerjaan_pasangan' => ['Pekerjaan Pasangan', Form::select("id_pekerjaan_pasangan", $ref_pekerjaan, null, ["class" => "form-control select2"])],
+			'id_sekolah' => ['Sekolah', Form::select("id_sekolah", $ref_sekolah, null, ["class" => "form-control select2"])],
+			'id_status_kepegawaian' => ['Status Kepegawaian', Form::select("id_status_kepegawaian", $ref_status_kepegawaian, null, ["class" => "form-control select2"])],
+			'id_status_perkawinan' => ['Status Perkawinan', Form::select("id_status_perkawinan", $ref_status_perkawinan, null, ["class" => "form-control select2"])],
+			'kode_pos' => ['Kode Pos', Form::text("kode_pos", $guru->kode_pos, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "kode_pos"])],
+			'lintang' => ['Lintang', Form::text("lintang", $guru->lintang, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "lintang"])],
+			'nama' => ['Nama', Form::text("nama", $guru->nama, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "nama"])],
+			'nama_ibu_kandung' => ['Nama Ibu Kandung', Form::text("nama_ibu_kandung", $guru->nama_ibu_kandung, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "nama_ibu_kandung"])],
+			'nama_pasangan' => ['Nama Pasangan', Form::text("nama_pasangan", $guru->nama_pasangan, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "nama_pasangan"])],
+			'nik' => ['Nik', Form::text("nik", $guru->nik, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "nik"])],
+			'nip' => ['Nip', Form::text("nip", $guru->nip, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "nip"])],
+			'no_hp' => ['No Hp', Form::text("no_hp", $guru->no_hp, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "no_hp"])],
+			'no_kk' => ['No Kk', Form::text("no_kk", $guru->no_kk, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "no_kk"])],
+			'npwp' => ['Npwp', Form::text("npwp", $guru->npwp, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "npwp"])],
+			'nuptk' => ['Nuptk', Form::text("nuptk", $guru->nuptk, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "nuptk"])],
+			'rt' => ['Rt', Form::text("rt", $guru->rt, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "rt"])],
+			'rw' => ['Rw', Form::text("rw", $guru->rw, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "rw"])],
+			'sk_pengangkatan' => ['Sk Pengangkatan', Form::text("sk_pengangkatan", $guru->sk_pengangkatan, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "sk_pengangkatan"])],
+			'tgl_lahir' => ['Tgl Lahir', Form::text("tgl_lahir", $guru->tgl_lahir, ["class" => "form-control datepicker", "required" => "required", "id" => "tgl_lahir"])],
+			'tmp_lahir' => ['Tmp Lahir', Form::text("tmp_lahir", $guru->tmp_lahir, ["class" => "form-control", "placeholder" => "", "required" => "required", "id" => "tmp_lahir"])],
+			'tmt_pengangkatan' => ['Tmt Pengangkatan', Form::text("tmt_pengangkatan", $guru->tmt_pengangkatan, ["class" => "form-control datepicker", "required" => "required", "id" => "tmt_pengangkatan"])],
+
 		);
 
-		$text = 'membuka form edit '.$this->title;//.' '.$guru->what;
+		$text = 'membuka form edit ' . $this->title; //.' '.$guru->what;
 		$this->log($request, $text, ['guru.id' => $guru->id]);
 		return view('Guru::guru_update', array_merge($data, ['title' => $this->title]));
 	}
@@ -266,9 +274,9 @@ class GuruController extends Controller
 			'tgl_lahir' => 'required',
 			'tmp_lahir' => 'required',
 			'tmt_pengangkatan' => 'required',
-			
+
 		]);
-		
+
 		$guru = Guru::find($id);
 		$guru->alamat = $request->input("alamat");
 		$guru->bujur = $request->input("bujur");
@@ -301,12 +309,12 @@ class GuruController extends Controller
 		$guru->tgl_lahir = $request->input("tgl_lahir");
 		$guru->tmp_lahir = $request->input("tmp_lahir");
 		$guru->tmt_pengangkatan = $request->input("tmt_pengangkatan");
-		
+
 		$guru->updated_by = Auth::id();
 		$guru->save();
 
 
-		$text = 'mengedit '.$this->title;//.' '.$guru->what;
+		$text = 'mengedit ' . $this->title; //.' '.$guru->what;
 		$this->log($request, $text, ['guru.id' => $guru->id]);
 		return redirect()->route('guru.index')->with('message_success', 'Guru berhasil diubah!');
 	}
@@ -318,9 +326,141 @@ class GuruController extends Controller
 		$guru->save();
 		$guru->delete();
 
-		$text = 'menghapus '.$this->title;//.' '.$guru->what;
+		$text = 'menghapus ' . $this->title; //.' '.$guru->what;
 		$this->log($request, $text, ['guru.id' => $guru->id]);
 		return back()->with('message_success', 'Guru berhasil dihapus!');
 	}
 
+	public function import(Request $request)
+	{
+		$data['forms'] = array(
+			'file' => ['Pilih Salah Satu', Form::file("file", ["class" => "form-control", "placeholder" => "", "required" => "required"])],
+
+		);
+
+		$this->log($request, 'membuka form import ' . $this->title);
+		return view('Guru::guru_import', array_merge($data, ['title' => $this->title]));
+	}
+
+	public function file_store(Request $request)
+	{
+		$request->validate([
+			'file' => 'required|mimes:xlsx|max:10240'
+		]);
+
+		$file = $request->file('file');
+		$reader = IOFactory::createReader('Xlsx');
+		$spreadsheet = $reader->load($file);
+
+		$worksheet = $spreadsheet->getActiveSheet();
+		$data = $worksheet->toArray();
+
+		for ($i = 1; $i < count($data); $i++) {
+			$guru = new Guru();
+			// dd($data);
+			$guru->id_sekolah = Auth::user()->id_sekolah;
+			$guru->nama = $data[$i][1];
+			$guru->nuptk = $data[$i][2];
+
+			// Jenis Kelamin
+			$jenisKelamin = JenisKelamin::where('kode', $data[$i][3])->first();
+			// 
+
+			$guru->id_jenis_kelamin = $jenisKelamin->id;
+			$guru->tmp_lahir = $data[$i][4];
+			$guru->tgl_lahir = $data[$i][5];
+			$guru->nip = $data[$i][6];
+
+
+			// Status Kepegawaian
+			$status_kepegawaian = new StatusKepegawaian();
+			$status_kepegawaian->status_kepegawaian = $data[$i][7];
+			$status_kepegawaian->save();
+			$statusKepegawaian = StatusKepegawaian::where('status_kepegawaian', $data[$i][7])->first();
+			// 
+
+
+			$guru->id_status_kepegawaian = $statusKepegawaian->id;
+
+			// Agama
+			$agama = Agama::where('agama', $data[$i][8])->first();
+			// 
+
+			// if (!$agama) {
+
+			// 	$agama = Agama::where('agama', 'Islam')->first();
+			// }
+
+			$guru->id_agama = $agama->id;
+			$guru->no_hp = $data[$i][9];
+			$guru->email = $data[$i][10];
+			$guru->npwp = $data[$i][11];
+			$guru->nik = $data[$i][12];
+			$guru->no_kk = $data[$i][13];
+
+			$guru->save();
+		}
+
+
+		// for ($i = 1; $i < count($data); $i++) {
+
+		// 	$jenisKelamin = JenisKelamin::where('kode', $data[$i][3])->first();
+		// 	$agama = Agama::where('agama', $data[$i][8])->first();
+		// 	if (!$agama) {
+
+		// 		$agama = Agama::where('agama', 'islam')->first();
+		// 	}
+		// 	$tempatTinggal = TempatTinggal::where('tempat_tinggal', $data[$i][12])->first();
+		// 	$transportasi = Transportasi::where('transportasi', $data[$i][13])->first();
+
+		// 	$siswa = new Siswa();
+
+		// 	$siswa->nama_siswa = htmlspecialchars($data[$i][1]);
+		// 	$siswa->nis = $data[$i][2];
+		// 	$siswa->id_jenis_kelamin = $jenisKelamin->id;
+		// 	$siswa->nisn = $data[$i][4];
+		// 	$siswa->tmp_lahir = $data[$i][5];
+		// 	$siswa->tgl_lahir = $data[$i][6];
+		// 	$siswa->nik = $data[$i][7];
+
+		// 	$siswa->id_agama = $agama->id;
+		// 	$siswa->alamat = $data[$i][9];
+		// 	$siswa->rt = $data[$i][10];
+		// 	$siswa->rw = $data[$i][11];
+		// 	$siswa->id_tempat_tinggal = $tempatTinggal->id;
+		// 	if ($transportasi) {
+
+		// 		$siswa->id_transportasi = $transportasi->id;
+		// 	}
+		// 	$siswa->no_telp = $data[$i][14];
+		// 	$siswa->no_hp = $data[$i][15];
+		// 	$siswa->email = $data[$i][16];
+		// 	$siswa->id_sekolah = Auth::user()->id_sekolah;
+
+		// 	$siswa->save();
+
+
+		// 	$kelas = Kelas::where('kode_kelas', $data[$i][17])->first();
+
+
+		// 	if (!$kelas) {
+		// 		$kelas = new Kelas();
+
+		// 		$kelas->nama_kelas = $data[$i][17];
+		// 		$kelas->kode_kelas = $data[$i][17];
+		// 		$kelas->id_sekolah = Auth::user()->id_sekolah;
+
+		// 		$kelas->save();
+		// 	}
+
+		// 	$semester = Semester::where('is_active', 1)->first();
+
+		// 	$anggota_kelas = new AnggotaKelas();
+		// 	$anggota_kelas->id_siswa = $siswa->id;
+		// 	$anggota_kelas->id_kelas = $kelas->id;
+		// 	$anggota_kelas->id_semester = $semester->id;
+
+		// 	$anggota_kelas->save();
+		// }
+	}
 }
