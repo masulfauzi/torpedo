@@ -3,7 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Modules\Guru\Controllers\GuruController;
 
-Route::controller(GuruController::class)->middleware(['web','auth'])->name('guru.')->group(function(){
+Route::controller(GuruController::class)->middleware(['web', 'auth'])->name('guru.')->group(function () {
+	Route::get('/guru/import', 'import')->name('import.index');
+	Route::post('/guru/import', 'file_store')->name('import.store');
 	Route::get('/guru', 'index')->name('index');
 	Route::get('/guru/data', 'data')->name('data.index');
 	Route::get('/guru/create', 'create')->name('create');
