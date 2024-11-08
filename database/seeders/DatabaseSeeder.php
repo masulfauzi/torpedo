@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use App\Modules\Desa\Models\Desa;
 use Database\Seeders\AgamaSeeder;
+use Database\Seeders\MapelSeeder;
+use Database\Seeders\SemesterSeeder;
 use Database\Seeders\MenuTableSeeder;
 use Database\Seeders\RoleTableSeeder;
 use Database\Seeders\UsersTableSeeder;
@@ -106,5 +108,6 @@ class DatabaseSeeder extends Seeder
         $this->call(TempatTinggalSeeder::class);
         $this->call(TransportasiSeeder::class);
         $this->call(SemesterSeeder::class);
+        $this->call(MapelSeeder::class);
     }
 }
